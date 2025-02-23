@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Çevirmece - Oğuz İngilizce Öğreniyor</title>
+  <style>
+    /* Genel sayfa stili */
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #88b9eadc, #88b9eadc);
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    /* Sol üstte konumlandırılmış geri dönüş butonu */
+    .back-button {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+    }
+    .back-button button {
+      font-size: 1.2em;
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+    /* Başlık stili */
+    h1 {
+      margin-top: 50px;
+      font-size: 2em;
+    }
+    /* Oyunun içeriklerini saran kutu */
+    .game-container {
+      background: rgba(235, 88, 88, 0.8);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      max-width: 600px;
+      margin: 40px auto;
+    }
+    /* Puan gösterimi */
+    #score {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+    }
+    /* İngilizce cümlenin stili */
+    #englishSentence {
+      font-size: 1.8em;
+      margin-bottom: 20px;
+    }
+    /* Çeviri giriş alanı */
+    #translationInput {
+      font-size: 1.5em;
+      padding: 10px;
+      width: 80%;
+      margin-bottom: 20px;
+    }
+    /* Çevir butonunun stili */
+    #submitBtn {
+      font-size: 1.5em;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+    /* Mesaj alanı */
+    #message {
+      font-size: 2.5em;
+      margin-top: 20px;
+      min-height: 1.5em;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sol üstte Ana Sayfaya Dön butonu -->
+  <div class="back-button">
+    <button onclick="location.href='index.html'">Ana Sayfaya Dön</button>
+  </div>
+
+  <h1>Çevirmece</h1>
+
+  <div class="game-container">
+    <div id="score">Puan: 0</div>
+    <div id="englishSentence">İngilizce cümle burada</div>
+    <input type="text" id="translationInput" placeholder="Türkçeye çevirin" />
+    <br>
+    <button id="submitBtn">Çevir</button>
+    <div id="message"></div>
+  </div>
+
+  <script>
+    // Oyunda kullanılacak cümleler
+    const sentences = [
+      { english: "I love apples",       turkish: "ben elma severim" },
+      { english: "She drinks water",     turkish: "o su içer" },
+      { english: "They read books",      turkish: "onlar kitap okur" },
+      { english: "We play soccer",       turkish: "biz futbol oynarız" },
+      { english: "He writes letters",    turkish: "o mektup yazar" },
+      { english: "You study English",    turkish: "sen ingilizce çalışırsın" }
+    ];
+
+    let currentIndex = 0;
+    let score = 0;
+
+    const scoreDiv = document.getElementById("score");
+    const englishSentenceDiv = document.getElementById("englishSentence");
+    const translationInput = document.getElementById("translationInput");
+    const submitBtn = document.getElementById("submitBtn");
+    const messageDiv = document.getElementById("message");
+
+    // Puanı güncelleyen fonksiyon
+    function updateScore() {
+      scoreDiv.textContent = "Puan: " + score;
+    }
+
+    // Belirli süreyle mesaj gösteren fonksiyon
+    function showMessage(msg) {
+      messageDiv.textContent = msg;
+      setTimeout(() => {
+        messageDiv.textContent = "";
+      }, 1500);
+    }
+
+    // Şu anki cümleyi yükleyen fonksiyon
+    function loadSentence() {
+      if(currentIndex >= sentences.length) {
+        englishSentenceDiv.textContent = "Tüm cümleleri tamamladın!";
+        translationInput.style.display = "none";
+        submitBtn.style.display = "none";
+        return;
+      }
+      const currentSentence = sentences[currentIndex];
+      englishSentenceDiv.textContent = currentSentence.english;
+      translationInput.value = "";
+      translationInput.focus();
+    }
+
+    // Kullanıcının girdiği çeviriyi kontrol eden fonksiyon
+    function checkTranslation() {
+      const currentSentence = sentences[currentIndex];
+      // Cevabı küçük harfe çevirerek kontrol ediyoruz
+      let userTranslation = translationInput.value.trim().toLowerCase();
+      if(userTranslation === currentSentence.turkish) {
+        score += 10;
+        updateScore();
+        showMessage("Harikasın Oğuz");
+        currentIndex++;
+        setTimeout(loadSentence, 1500);
+      } else {
+        showMessage("Tekrar dene");
+      }
+    }
+
+    // Buton tıklamasıyla çeviri kontrolü
+    submitBtn.addEventListener("click", checkTranslation);
+
+    // Enter tuşuyla da gönderim sağlanabilir
+    translationInput.addEventListener("keyup", function(event) {
+      if(event.key === "Enter") {
+        checkTranslation();
+      }
+    });
+
+    // İlk cümleyi yükle
+    loadSentence();
+  </script>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Boşluk Doldurma Oyunu - Oğuz İngilizce Öğreniyor</title>
+  <style>
+    .back-button button {
+      font-size: 1.5em;
+      padding: 10px 20px;
+      cursor: pointer;
+      position: absolute;  /* Mutlak konumlandırma */
+      top: 10px;           /* Üstten 10px mesafe */
+      left: 10px;          /* Soldan 10px mesafe */
+    }
+    body {
+        font-family: Arial, sans-serif;
+    /* Daha hoş bir arka plan için gradyan kullanın: */
+    background: linear-gradient(135deg, #96c9fc, #a2cdf8);
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    #score {
+      margin-top: 10px;
+      font-size: 1.5em; /* Skor alanı için de boyut artırıldı */
+    }
+    #sentence {
+    font-size: 2em; /* Font boyutu büyütüldü */
+    margin-bottom: 20px;
+    }
+    .option {
+      display: inline-block;
+      margin: 10px;
+      padding: 10px 20px;
+      background: #f9f640;
+      border: 1px solid #bbbbbb29;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+      font-size: 1.5em; /* Seçeneklerin font boyutu artırıldı */
+    }
+    .option:hover {
+      background: #90c1f9;
+    }
+    .option.correct {
+      background: lightgreen;
+    }
+    .option.wrong {
+      background: lightcoral;
+    }
+    #message {
+      font-size: 1.2em;
+      margin-top: 20px;
+      min-height: 1.5em;
+    }
+    .game-container {
+  background: rgba(243, 176, 135, 0.849);  /* Yarı opak beyaz arka plan */
+  padding: 40px;
+  border-radius: 20px;                   /* Yuvarlak köşeler */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Hafif gölge efekti */
+  max-width: 600px;
+  margin: 40px auto;                     /* Sayfanın ortasında hizalama */
+}
+  </style>
+</head>
+<body>
+    <!-- Geri Dön Butonu -->
+  <div class="back-button">
+    <button onclick="location.href='index.html'">Ana Sayfaya Dön</button>
+  </div>
+  <h1>Boşluk Doldurma Oyunu</h1>
+   <!-- Yeni oluşturulan container -->
+   <div class="game-container">
+    <div id="score">Puan: 0</div>
+    <div id="sentence"></div>
+    <div id="options"></div>
+    <div id="message"></div>
+  </div>
+  <div id="score">Puan: 0</div>
+  <div id="sentence"></div>
+  <div id="options"></div>
+  <div id="message"></div>
+
+  <script>
+    const sentences = [
+      {
+        sentence: "I ___ to school.",
+        missing: "go",
+        options: ["go", "eat", "run", "study"]
+      },
+      {
+        sentence: "She ___ a book.",
+        missing: "reads",
+        options: ["reads", "writes", "eats", "sings"]
+      },
+      {
+        sentence: "They ___ dinner together.",
+        missing: "have",
+        options: ["have", "make", "take", "see"]
+      },
+      {
+        sentence: "He ___ soccer today.",
+        missing: "plays",
+        options: ["plays", "drinks", "sleeps", "runs"]
+      },
+      {
+        sentence: "We ___ the movie.",
+        missing: "watch",
+        options: ["watch", "read", "make", "create"]
+      },
+      {
+        sentence: "It ___ very quickly.",
+        missing: "moves",
+        options: ["moves", "sings", "stops", "jumps"]
+      }
+    ];
+
+    let currentIndex = 0;
+    let score = 0;
+
+    const sentenceDiv = document.getElementById("sentence");
+    const optionsDiv = document.getElementById("options");
+    const messageDiv = document.getElementById("message");
+    const scoreDiv = document.getElementById("score");
+
+    function updateScore() {
+      scoreDiv.textContent = "Puan: " + score;
+    }
+
+    function showMessage(msg) {
+      messageDiv.textContent = msg;
+      setTimeout(() => {
+        messageDiv.textContent = "";
+      }, 1500);
+    }
+
+    function loadSentence() {
+      if (currentIndex >= sentences.length) {
+        sentenceDiv.textContent = "Tüm cümleleri tamamladın!";
+        optionsDiv.innerHTML = "";
+        return;
+      }
+      // Temizle
+      optionsDiv.innerHTML = "";
+      const currentSentence = sentences[currentIndex];
+      sentenceDiv.textContent = currentSentence.sentence;
+
+      // Seçenekleri karıştır
+      const shuffledOptions = currentSentence.options.sort(() => Math.random() - 0.5);
+      shuffledOptions.forEach(option => {
+        const button = document.createElement("button");
+        button.textContent = option;
+        button.className = "option";
+        button.addEventListener("click", () => checkAnswer(option, button));
+        optionsDiv.appendChild(button);
+      });
+    }
+
+    function checkAnswer(selected, button) {
+      const currentSentence = sentences[currentIndex];
+      if (selected === currentSentence.missing) {
+        button.classList.add("correct");
+        score += 10;
+        updateScore();
+        showMessage("Harikasın Oğuz");
+        setTimeout(() => {
+          currentIndex++;
+          loadSentence();
+        }, 1500);
+      } else {
+        button.classList.add("wrong");
+        showMessage("Tekrar dene");
+      }
+    }
+
+    loadSentence();
+  </script>
+</body>
+</html>
