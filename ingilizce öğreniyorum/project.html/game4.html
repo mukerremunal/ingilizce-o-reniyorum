@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Hafıza Kartları Oyunu - Oğuz İngilizce Öğreniyor</title>
+  <style>
+    /* Genel sayfa stili */
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #8797a7, #e9ecef);
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+    }
+    /* Sol üstte Ana Sayfaya Dön butonu */
+    .back-button {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+    }
+    .back-button button {
+      font-size: 1.2em;
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+    h1 {
+      margin-top: 50px;
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+    /* Puan göstergesi */
+    #score {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+    }
+    /* Oyun tahtası */
+    .game-container {
+      max-width: 600px;
+      margin: 20px auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    /* Kart stil tanımı */
+    .card {
+      background: #007BFF;
+      color: white;
+      font-size: 1.5em;
+      padding: 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100px;
+      user-select: none;
+      transition: background 0.3s;
+    }
+    .card.flipped, .card.matched {
+      background: #28a745;
+      cursor: default;
+    }
+    .card-text {
+  text-align: center;
+  margin-top: 5px;
+  color: white;
+  font-size: 1.2em;
+}
+  </style>
+</head>
+<body>
+  <!-- Sol üstte Ana Sayfaya Dön butonu -->
+  <div class="back-button">
+    <button onclick="location.href='index.html'">Ana Sayfaya Dön</button>
+  </div>
+
+  <h1>Hafıza Kartları Oyunu</h1>
+  <div id="score">Puan: 0</div>
+  <div class="game-container" id="gameBoard"></div>
+  <div id="message"></div>
+
+  <script>
+    // Hafıza oyunu için kullanılacak kelimeler (8 farklı kelime)
+    const words = ["apple", "dog", "cat", "sun", "moon", "tree", "car", "ball"];
+
+    // Her kelimenin çiftini oluşturup, tek bir diziye ekleyelim
+    let cardValues = [...words, ...words];
+    // Kart değerlerine göre resim dosyalarını tanımlayan nesne (imageMap)
+const imageMap = {
+  "tree": "tree.jpg",
+  "dog": "dog.jpg",
+  "cat": "cat.jpg",
+  "sun": "sun.jpg",
+  "car": "car.jpg",
+  "apple": "apple.jpg",
+  "ball": "ball.jpg",
+  "moon": "moon.jpg",
+  // Diğer kartlarınız için benzer şekilde ekleyin...
+};
+
+    // Diziyi karıştıran fonksiyon (Fisher-Yates algoritması)
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+    cardValues = shuffle(cardValues);
+
+    const gameBoard = document.getElementById("gameBoard");
+    let firstCard = null;
+    let secondCard = null;
+    let lockBoard = false;
+    let score = 0;
+
+    // Puanı güncelleyen fonksiyon
+    function updateScore() {
+      document.getElementById("score").textContent = "Puan: " + score;
+    }
+    // Oyun tahtasını oluştur
+    function createBoard() {
+      cardValues.forEach((value, index) => {
+        const card = document.createElement("div");
+        card.classList.add("card");
+        card.dataset.value = value;
+        card.dataset.index = index;
+        // Kartlar kapalı olduğu için başlangıçta içeriği göstermiyoruz
+        card.textContent = "";
+        card.addEventListener("click", flipCard);
+        gameBoard.appendChild(card);
+      });
+    }
+
+    function flipCard() {
+  if (lockBoard) return;
+  if (this === firstCard) return;
+
+  this.classList.add("flipped");
+
+  // Eğer kartın değeri için bir resim tanımlıysa, resmi ve altına metni ekle
+  if (imageMap[this.dataset.value]) {
+    this.innerHTML = 
+      '<div class="card-content" style="display: flex; flex-direction: column; align-items: center;">' +
+        '<img src="' + imageMap[this.dataset.value] + 
+          '" alt="' + this.dataset.value + 
+          '" style="max-width:100%; height:auto;">' +
+        '<div class="card-text" style="margin-top: 5px; text-align: center;">' +
+          this.dataset.value +
+        '</div>' +
+      '</div>';
+  } else {
+    // Aksi halde, sadece metni göster
+    this.textContent = this.dataset.value;
+  }
+
+  if (!firstCard) {
+    firstCard = this;
+    return;
+  }
+
+  secondCard = this;
+  checkForMatch();
+}
+
+    // Eşleşmeyi kontrol eden fonksiyon
+    function checkForMatch() {
+      const isMatch = firstCard.dataset.value === secondCard.dataset.value;
+      if (isMatch) {
+        disableCards();
+      } else {
+        unflipCards();
+      }
+    }
+
+    // Eşleşen kartları kilitleyen fonksiyon
+    function disableCards() {
+      firstCard.classList.add("matched");
+      secondCard.classList.add("matched");
+      score += 10;
+      updateScore();
+      showMessage("Harikasın Oğuz");
+      resetBoard();
+      checkGameOver();
+    }
+
+    // Eşleşmeyen kartları tekrar kapatan fonksiyon
+    function unflipCards() {
+      lockBoard = true;
+      setTimeout(() => {
+        firstCard.classList.remove("flipped");
+        secondCard.classList.remove("flipped");
+        firstCard.textContent = "";
+        secondCard.textContent = "";
+        resetBoard();
+      }, 1000);
+      showMessage("Tekrar dene");
+    }
+
+    // Kart seçimlerini sıfırlayan fonksiyon
+    function resetBoard() {
+      [firstCard, secondCard] = [null, null];
+      lockBoard = false;
+    }
+
+    // Geçici mesaj gösteren fonksiyon
+    function showMessage(msg) {
+      const messageDiv = document.getElementById("message");
+      messageDiv.textContent = msg;
+      setTimeout(() => {
+        messageDiv.textContent = "";
+      }, 1500);
+    }
+
+    // Tüm kartlar eşleştiğinde oyunun bittiğini kontrol eder
+    function checkGameOver() {
+      const matchedCards = document.querySelectorAll(".card.matched");
+      if (matchedCards.length === cardValues.length) {
+        showMessage("Tüm kartları buldun! Tebrikler!");
+      }
+    }
+
+    createBoard();
+    updateScore();
+  </script>
+</body>
+</html>

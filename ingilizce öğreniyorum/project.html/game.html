@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>oğuz ingilizce öğreniyor</title>
+  <style>
+    .back-button button {
+      font-size: 1.5em;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: #c0a87095;
+      margin: 0;
+      padding: 20px;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    #score {
+      text-align: center;
+      margin-top: 5px;
+    }
+    #message {
+      text-align: center;
+      font-size: 1.2em;
+      color: blue;
+      margin-top: 10px;
+      min-height: 1.5em;
+    }
+    .container {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .list {
+      width: 45%;
+      background: #fff;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .card {
+      padding: 10px;
+      margin: 5px;
+      background: #e37b2b7b;
+      border: 1px solid #bbb;
+      cursor: pointer;
+      text-align: center;
+      border-radius: 5px;
+      transition: background 0.3s, border 0.3s;
+      font-size: 1.5em; /* Bu satırı ekleyin ya da mevcut değeri artırın */
+    }
+    .card.selected {
+      border: 2px solid blue;
+      background: #d0e6ff;
+    }
+    .card.matched {
+      background: lightgreen;
+      cursor: default;
+    }
+  </style>
+</head>
+<body>
+  <!-- Geri Dön Butonu -->
+  <div class="back-button">
+    <button onclick="location.href='index.html'">Ana Sayfaya Dön</button>
+  </div>
+  <h1>oğuz ingilizce öğreniyor</h1>
+  <h2 id="score">Puan: 0</h2>
+  <div id="message"></div>
+  
+  <div class="container">
+    <div class="list" id="turkishList">
+      <h2>Türkçe</h2>
+    </div>
+    <div class="list" id="englishList">
+      <h2>English</h2>
+    </div>
+  </div>
+
+  <script>
+    // 100 kelimelik eşleştirme listesi (id ile eşleşiyor)
+    const pairs = [
+      {id: 1, tr: "kırmızı",      en: "red"},
+      {id: 2, tr: "mavi",         en: "blue"},
+      {id: 3, tr: "yeşil",        en: "green"},
+      {id: 4, tr: "sarı",         en: "yellow"},
+      {id: 5, tr: "turuncu",      en: "orange"},
+      {id: 6, tr: "mor",          en: "purple"},
+      {id: 7, tr: "pembe",        en: "pink"},
+      {id: 8, tr: "kahverengi",   en: "brown"},
+      {id: 9, tr: "siyah",        en: "black"},
+      {id: 10, tr: "beyaz",       en: "white"},
+      {id: 11, tr: "kedi",        en: "cat"},
+      {id: 12, tr: "köpek",       en: "dog"},
+      {id: 13, tr: "kuş",         en: "bird"},
+      {id: 14, tr: "balık",       en: "fish"},
+      {id: 15, tr: "at",          en: "horse"},
+      {id: 16, tr: "inek",        en: "cow"},
+      {id: 17, tr: "koyun",       en: "sheep"},
+      {id: 18, tr: "domuz",       en: "pig"},
+      {id: 19, tr: "tavşan",      en: "rabbit"},
+      {id: 20, tr: "aslan",       en: "lion"},
+      {id: 21, tr: "gitmek",      en: "go"},
+      {id: 22, tr: "gelmek",      en: "come"},
+      {id: 23, tr: "yemek",       en: "eat"},
+      {id: 24, tr: "içmek",       en: "drink"},
+      {id: 25, tr: "uyumak",      en: "sleep"},
+      {id: 26, tr: "konuşmak",    en: "speak"},
+      {id: 27, tr: "görmek",      en: "see"},
+      {id: 28, tr: "duymak",      en: "hear"},
+      {id: 29, tr: "okumak",      en: "read"},
+      {id: 30, tr: "yazmak",      en: "write"},
+      {id: 31, tr: "ev",          en: "house"},
+      {id: 32, tr: "araba",       en: "car"},
+      {id: 33, tr: "kitap",       en: "book"},
+      {id: 34, tr: "kalem",       en: "pen"},
+      {id: 35, tr: "masa",        en: "table"},
+      {id: 36, tr: "sandalye",    en: "chair"},
+      {id: 37, tr: "kapı",        en: "door"},
+      {id: 38, tr: "pencere",     en: "window"},
+      {id: 39, tr: "telefon",     en: "phone"},
+      {id: 40, tr: "bilgisayar",  en: "computer"},
+      {id: 41, tr: "su",          en: "water"},
+      {id: 42, tr: "hava",        en: "air"},
+      {id: 43, tr: "ateş",        en: "fire"},
+      {id: 44, tr: "toprak",      en: "earth"},
+      {id: 45, tr: "ağaç",        en: "tree"},
+      {id: 46, tr: "çiçek",       en: "flower"},
+      {id: 47, tr: "meyve",       en: "fruit"},
+      {id: 48, tr: "sebze",       en: "vegetable"},
+      {id: 49, tr: "ekmek",       en: "bread"},
+      {id: 50, tr: "peynir",      en: "cheese"},
+      {id: 51, tr: "iyi",         en: "good"},
+      {id: 52, tr: "kötü",        en: "bad"},
+      {id: 53, tr: "büyük",       en: "big"},
+      {id: 54, tr: "küçük",       en: "small"},
+      {id: 55, tr: "hızlı",       en: "fast"},
+      {id: 56, tr: "yavaş",       en: "slow"},
+      {id: 57, tr: "sıcak",       en: "hot"},
+      {id: 58, tr: "soğuk",       en: "cold"},
+      {id: 59, tr: "yeni",        en: "new"},
+      {id: 60, tr: "eski",        en: "old"},
+      {id: 61, tr: "elma",        en: "apple"},
+      {id: 62, tr: "muz",         en: "banana"},
+      {id: 63, tr: "portakal",    en: "orange"},
+      {id: 64, tr: "üzüm",        en: "grape"},
+      {id: 65, tr: "çilek",       en: "strawberry"},
+      {id: 66, tr: "anne",        en: "mother"},
+      {id: 67, tr: "baba",        en: "father"},
+      {id: 68, tr: "kardeş",      en: "sibling"},
+      {id: 69, tr: "çocuk",       en: "child"},
+      {id: 70, tr: "arkadaş",     en: "friend"},
+      {id: 71, tr: "okul",        en: "school"},
+      {id: 72, tr: "öğretmen",    en: "teacher"},
+      {id: 73, tr: "öğrenci",     en: "student"},
+      {id: 74, tr: "sınıf",       en: "class"},
+      {id: 75, tr: "kütüphane",   en: "library"},
+      {id: 76, tr: "sevgi",       en: "love"},
+      {id: 77, tr: "mutluluk",    en: "happiness"},
+      {id: 78, tr: "üzgün",       en: "sad"},
+      {id: 79, tr: "sinirli",     en: "angry"},
+      {id: 80, tr: "korku",       en: "fear"},
+      {id: 81, tr: "bahar",       en: "spring"},
+      {id: 82, tr: "yaz",         en: "summer"},
+      {id: 83, tr: "sonbahar",    en: "autumn"},
+      {id: 84, tr: "kış",         en: "winter"},
+      {id: 85, tr: "gün",         en: "day"},
+      {id: 86, tr: "gece",        en: "night"},
+      {id: 87, tr: "sabah",       en: "morning"},
+      {id: 88, tr: "akşam",       en: "evening"},
+      {id: 89, tr: "hafta",       en: "week"},
+      {id: 90, tr: "ay",          en: "month"},
+      {id: 91, tr: "para",        en: "money"},
+      {id: 92, tr: "iş",          en: "job"},
+      {id: 93, tr: "oyun",        en: "game"},
+      {id: 94, tr: "müzik",       en: "music"},
+      {id: 95, tr: "resim",       en: "picture"},
+      {id: 96, tr: "film",        en: "movie"},
+      {id: 97, tr: "haber",       en: "news"},
+      {id: 98, tr: "yol",         en: "road"},
+      {id: 99, tr: "şehir",       en: "city"},
+      {id: 100, tr: "ülke",      en: "country"}
+    ];
+
+    // Rastgele sıralama fonksiyonu
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    const groupSize = 5;
+    let currentGroup = 0;
+    let score = 0;
+    let shuffledPairs = shuffle([...pairs]);
+    let selectedTurkish = null;
+    let selectedEnglish = null;
+
+    function updateScore() {
+      document.getElementById("score").textContent = "Puan: " + score;
+    }
+
+    function showMessage(msg) {
+      const messageDiv = document.getElementById("message");
+      messageDiv.textContent = msg;
+      setTimeout(() => {
+        messageDiv.textContent = "";
+      }, 1500);
+    }
+
+    // Yeni grubu yükle: Mevcut kartları temizler ve grup kelimelerini oluşturur
+    function loadGroup(groupIndex) {
+      const turkishList = document.getElementById("turkishList");
+      const englishList = document.getElementById("englishList");
+      // Önceki kartları başlık hariç temizle
+      turkishList.innerHTML = "<h2>Türkçe</h2>";
+      englishList.innerHTML = "<h2>English</h2>";
+
+      const startIndex = groupIndex * groupSize;
+      const groupPairs = shuffledPairs.slice(startIndex, startIndex + groupSize);
+
+      // Grup içerisindeki kelimeleri rastgele sıralayarak oluşturuyoruz
+      const turkishWords = groupPairs.map(pair => ({id: pair.id, word: pair.tr}));
+      const englishWords = groupPairs.map(pair => ({id: pair.id, word: pair.en}));
+
+      shuffle(turkishWords);
+      shuffle(englishWords);
+
+      turkishWords.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.textContent = item.word;
+        card.dataset.id = item.id;
+        card.dataset.language = "tr";
+        card.addEventListener("click", () => selectCard(card));
+        turkishList.appendChild(card);
+      });
+
+      englishWords.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.textContent = item.word;
+        card.dataset.id = item.id;
+        card.dataset.language = "en";
+        card.addEventListener("click", () => selectCard(card));
+        englishList.appendChild(card);
+      });
+    }
+
+    function selectCard(card) {
+      if (card.classList.contains("matched")) return;
+      const language = card.dataset.language;
+      if (language === "tr") {
+        if (selectedTurkish) {
+          selectedTurkish.classList.remove("selected");
+          if (selectedTurkish === card) {
+            selectedTurkish = null;
+            return;
+          }
+        }
+        selectedTurkish = card;
+        card.classList.add("selected");
+      } else {
+        if (selectedEnglish) {
+          selectedEnglish.classList.remove("selected");
+          if (selectedEnglish === card) {
+            selectedEnglish = null;
+            return;
+          }
+        }
+        selectedEnglish = card;
+        card.classList.add("selected");
+      }
+      if (selectedTurkish && selectedEnglish) {
+        checkMatch();
+      }
+    }
+
+    function checkMatch() {
+      const trId = selectedTurkish.dataset.id;
+      const enId = selectedEnglish.dataset.id;
+      if (trId === enId) {
+        // Doğru eşleşme: kartları eşleştir, puan ekle ve mesaj göster
+        selectedTurkish.classList.add("matched");
+        selectedEnglish.classList.add("matched");
+        score += 10;
+        updateScore();
+        showMessage("Harikasın Oğuz");
+      } else {
+        showMessage("Tekrar dene");
+      }
+      selectedTurkish.classList.remove("selected");
+      selectedEnglish.classList.remove("selected");
+      selectedTurkish = null;
+      selectedEnglish = null;
+
+      // Eğer grup içindeki tüm Türkçe kartlar eşleştiyse, sonraki gruba geç
+      const matchedCards = document.querySelectorAll("#turkishList .card.matched").length;
+      if (matchedCards === groupSize) {
+        setTimeout(() => {
+          currentGroup++;
+          if (currentGroup * groupSize < shuffledPairs.length) {
+            loadGroup(currentGroup);
+          } else {
+            showMessage("Tüm kelimeleri öğrendin!");
+            document.getElementById("turkishList").innerHTML = "<h2>Türkçe</h2>";
+            document.getElementById("englishList").innerHTML = "<h2>English</h2>";
+          }
+        }, 1000);
+      }
+    }
+
+    // İlk grup yükleniyor
+    loadGroup(currentGroup);
+  </script>
+</body>
+</html>
